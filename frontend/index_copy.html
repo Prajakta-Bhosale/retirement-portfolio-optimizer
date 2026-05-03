@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" data-color-scheme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Smart Retirement Portfolio Optimizer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://rsms.me/inter/inter.css"
+    />
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Chart.js -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+      defer
+    ></script>
+    <!-- Axios -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"
+      defer
+    ></script>
+    <!-- Main script -->
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <!-- Loader -->
+    <div id="loader" class="loader hidden">
+      <div class="spinner"></div>
+      <p>Fetching portfolio and health data…</p>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <div class="app-shell">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-mark">SR</div>
+          <div>
+            <h1>Smart Retirement</h1>
+            <p class="subtitle">Multi‑Modal Portfolio Optimizer</p>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <label class="form-label" for="user-select">Select user</label>
+          <select id="user-select" class="form-control">
+            <option value="">Choose a user…</option>
+          </select>
+        </div>
+
+        <div class="sidebar-section">
+          <h3>Backend status</h3>
+          <div class="status-pill">
+            <span id="status-indicator" class="status-dot"></span>
+            <span id="status-text">Checking…</span>
+          </div>
+        </div>
+
+        <div class="sidebar-section stats-section">
+          <h3>Stats</h3>
+          <div class="stat">
+            <span class="stat-label">Users loaded : </span>
+            <span id="stat-users" class="stat-value">0</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main">
+        <!-- Header -->
+        <header class="page-header">
+          <div class="hero-card">
+            <div class="hero-icon">📊</div>
+            <div class="hero-text">
+              <h1 class="hero-title">Retirement Portfolio Dashboard</h1>
+              <p class="hero-subtitle">
+                Select a user and a model to see personalized allocation, financial metrics and health‑aware insights.
+              </p>
+            </div>
+          </div>
+        </header>
+
+
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">📊</div>
+          <h2>Welcome to Portfolio Optimizer</h2>
+          <p>
+            Select a user from the left panel to get started with personalized
+            portfolio recommendations.
+          </p>
+          <p>
+            Choose from 4 advanced models:
+            <strong>MPT</strong> (Classical),
+            <strong>DNN</strong> (Primary),
+            <strong>RL</strong> (Adaptive),
+            <strong>Ensemble</strong> (Consensus).
+          </p>
+          <p class="hint">
+            Once a user is selected, you will see allocation recommendations,
+            financial risk metrics and health‑aware insights.
+          </p>
+        </div>
+
+        <div id="content" class="content">
+          <!-- USER SUMMARY -->
+          <section id="user-info" class="card hidden">
+            <div class="card__header user-header">
+              <div>
+                <h3 id="user-name">User</h3>
+              </div>
+            </div>
+            <div class="card__body user-grid">
+              <div class="user-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Age</span>
+                  <span id="user-age" class="meta-value">–</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Years to retirement</span>
+                  <span id="user-retirement" class="meta-value">–</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Risk level</span>
+                  <span id="user-risk" class="meta-value">–</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Portfolio value</span>
+                  <span id="user-portfolio" class="meta-value">–</span>
+                </div>
+              </div>
+              <div class="user-wellness">
+                <h4>Overall wellness</h4>
+                <p class="wellness-score">
+                  <span id="user-wellness">–</span>
+                  <span class="wellness-unit">/ 100</span>
+                </p>
+                <p class="wellness-caption">
+                  Higher scores indicate better holistic health and capacity for
+                  risk.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- MODEL CONTROLS -->
+          <!-- MODEL CONTROLS & PREDICTIONS COMBINED -->
+          <section id="model-controls" class="card">
+            <div class="card__header">
+              <h3>Choose recommendation model</h3>
+              <p class="text-muted">
+                Compare classical finance with deep learning and
+                reinforcement‑learning based strategies.
+              </p>
+            </div>
+            <div class="card__body">
+              <div class="model-buttons">
+                <button class="model-btn active" data-model="mpt">MPT</button>
+                <button class="model-btn" data-model="dnn">DNN</button>
+                <button class="model-btn" data-model="rl">RL</button>
+                <button class="model-btn" data-model="ensemble">
+                  Ensemble
+                </button>
+              </div>
+              <p id="model-description" class="model-desc">
+                Select a model to see predictions.
+              </p>
+
+              <!-- PREDICTIONS SECTION -->
+              <div id="predictions-container" class="predictions-section hidden">
+                <!-- Model prediction header with charts and explanation -->
+                <div class="prediction-header">
+                  <div>
+                    <h3 id="pred-model-name">DNN (Deep Neural Network) - PRIMARY</h3>
+                    <p class="text-muted">
+                      Recommended stock/bond split based on your profile.
+                    </p>
+                  </div>
+                  <div class="confidence-badge">
+                    Confidence:
+                    <span id="pred-confidence">–</span>
+                  </div>
+                </div>
+
+                <!-- Donut Charts: Current vs Recommended -->
+                <div class="before-after-grid">
+                  <div class="mini-card">
+                    <h4>Current</h4>
+                    <p class="mini-subtitle">
+                      Stocks
+                      <span id="before-stocks">–</span>,
+                      Bonds
+                      <span id="before-bonds">–</span>
+                    </p>
+                    <div class="mini-chart">
+                      <canvas id="current-allocation-chart"></canvas>
+                    </div>
+                  </div>
+
+                  <div class="mini-card">
+                    <h4>Recommended</h4>
+                    <p class="mini-subtitle">
+                      Stocks
+                      <span id="after-stocks">–</span>,
+                      Bonds
+                      <span id="after-bonds">–</span>
+                    </p>
+                    <div class="mini-chart">
+                      <canvas id="optimized-allocation-chart"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hidden elements for allocation display (needed for JS) -->
+                <div class="allocation-display" style="display: none;">
+                  <div class="allocation-bar">
+                    <div id="stocks-bar" class="stocks-portion">
+                      <span class="bar-label"></span>
+                    </div>
+                    <div id="bonds-bar" class="bonds-portion">
+                      <span class="bar-label"></span>
+                    </div>
+                  </div>
+
+                  <div class="prediction-details">
+                    <div class="detail-item">
+                      <span class="label">Current allocation</span>
+                      <span id="current-alloc" class="value">–</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">Recommended allocation</span>
+                      <span id="optimized-alloc" class="value">–</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="explanation">
+                  <p id="explanation-text">
+                    The selected model uses your age, income, wellness and market
+                    regime features to propose an allocation that balances growth
+                    and downside risk.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- HEALTH PANEL -->
+          <section id="health-panel" class="card" style="display:none;">
+            <div class="card__header">
+              <h3>Health & Wellness</h3>
+              <p class="text-muted">Wellness, cardio and vitals trends</p>
+            </div>
+            <div class="card__body health-grid">
+              <!-- Left: summary metrics -->
+              <div class="health-metrics">
+                <div class="metric">
+                  <span class="metric-label">Wellness score</span>
+                  <div class="metric-bar">
+                    <div id="wellness-bar" class="metric-progress"></div>
+                  </div>
+                  <span id="wellness-value" class="metric-value">0/100</span>
+                </div>
+
+                <div class="metric">
+                  <span class="metric-label">Cardio health</span>
+                  <div class="metric-bar">
+                    <div id="cardio-bar" class="metric-progress"></div>
+                  </div>
+                  <span id="cardio-value" class="metric-value">0/100</span>
+                </div>
+
+                <div class="health-vitals">
+                  <div class="vital">
+                    <span class="metric-label">Heart rate</span>
+                    <span id="heart-value" class="metric-value">–</span>
+                  </div>
+                  <div class="vital">
+                    <span class="metric-label">HRV</span>
+                    <span id="hrv-value" class="metric-value">–</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: charts -->
+              <div class="health-charts">
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h4>Health Metrics</h4>
+                    <p class="chart-subtitle">
+                      Wellness vs cardio vs stress
+                    </p>
+                  </div>
+                  <div class="chart-wrapper">
+                    <canvas id="health-radar-chart"></canvas>
+                  </div>
+                </div>
+
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h4>Vitals Trend</h4>
+                    <p class="chart-subtitle">
+                      Heart rate & HRV over time (synthetic demo)
+                    </p>
+                  </div>
+                  <div class="chart-wrapper">
+                    <canvas id="vitals-line-chart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- FINANCIAL PANEL -->
+          <section id="financial-panel" class="card" style="display:none;">
+            <div class="card__header">
+              <h3>Financial & Risk Metrics</h3>
+              <p class="text-muted">
+                Returns, volatility and drawdown profile
+              </p>
+            </div>
+            <div class="card__body financial-grid">
+              <div class="financial-metrics">
+                <div class="metric">
+                  <span class="metric-label">Annual return</span>
+                  <span id="annual-return" class="metric-value">–</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Volatility</span>
+                  <span id="volatility" class="metric-value">–</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Sharpe ratio</span>
+                  <span id="sharpe-ratio" class="metric-value">–</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-label">Max drawdown</span>
+                  <span id="max-drawdown" class="metric-value">–</span>
+                </div>
+              </div>
+
+              <div class="financial-charts">
+                <div class="chart-card">
+                  <div class="chart-header">
+                    <h4>Risk vs Return</h4>
+                    <p class="chart-subtitle">
+                      Return, volatility and Sharpe snapshot
+                    </p>
+                  </div>
+                  <div class="chart-wrapper">
+                    <canvas id="risk-return-chart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- COMPARISON TABLE -->
+          <section id="comparison-panel" class="card" style="display:none;">
+            <div class="card__header">
+              <h3>Model comparison</h3>
+              <p class="text-muted">
+                See how each model allocates between stocks and bonds and how
+                confident it is.
+              </p>
+            </div>
+            <div class="card__body comparison-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Model</th>
+                    <th>Stocks %</th>
+                    <th>Bonds %</th>
+                    <th>Confidence</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody id="comparison-tbody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- APPLY BUTTON -->
+          <button
+            id="apply-btn"
+            class="btn-apply hidden"
+            type="button"
+          >
+            Apply recommended allocation (demo only)
+          </button>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
